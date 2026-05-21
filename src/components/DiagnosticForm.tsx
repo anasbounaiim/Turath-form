@@ -1,11 +1,13 @@
 'use client'
 
 import Image from 'next/image'
-import { useEffect, useMemo, useState } from 'react'
+import { type FormEvent, useEffect, useMemo, useState } from 'react'
 import Confetti from '@/components/Confetti'
 import { CAROUSEL_IMAGES } from '@/data/carouselImages'
 import { OILS, QUESTIONS, OilId } from '@/data/questions'
 import { Answers, calculateRecommendations } from '@/data/recommendations'
+
+const LOGO_SRC = '/carousel/turath-logo.svg'
 
 const productAccents: Record<OilId, string> = {
   argan: 'from-[#24483B] via-[#6F8A72] to-[#E6C684]',
@@ -15,12 +17,14 @@ const productAccents: Record<OilId, string> = {
   sesame: 'from-[#315A4B] via-[#A9A879] to-[#E6C684]',
 }
 
-const LOGO_SRC = '/carousel/turath-logo.svg'
+type EmailStatus = 'idle' | 'sending' | 'success' | 'error'
 
 export default function DiagnosticForm() {
   const [step, setStep] = useState(0)
   const [answers, setAnswers] = useState<Answers>({})
   const [isComplete, setIsComplete] = useState(false)
+  const [email, setEmail] = useState('')
+  const [emailStatus, setEmailStatus] = useState<EmailStatus>('idle')
 
   const question = QUESTIONS[step]
   const selectedOption = answers[question.id]
@@ -28,10 +32,7 @@ export default function DiagnosticForm() {
   const result = useMemo(() => calculateRecommendations(answers), [answers])
 
   function selectOption(optionId: string) {
-    setAnswers((current) => ({
-      ...current,
-      [question.id]: optionId,
-    }))
+    setAnswers((current) => ({ ...current, [question.id]: optionId }))
   }
 
   function goNext() {
@@ -55,6 +56,54 @@ export default function DiagnosticForm() {
     setAnswers({})
     setStep(0)
     setIsComplete(false)
+    setEmail('')
+    setEmailStatus('idle')
+  }
+
+  async function sendDiagnosticEmail(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault()
+
+    if (!email.trim()) {
+      return
+    }
+
+    setEmailStatus('sending')
+
+    const selectedAnswers = QUESTIONS.map((item) => {
+      const selectedOptionId = answers[item.id]
+      const option = item.options.find((entry) => entry.id === selectedOptionId)
+
+      return `${item.text}: ${option?.label ?? 'Non répondu'}`
+    })
+
+    const recommendedOils = result.oils.map((oilId, index) => ({
+      rank: index + 1,
+      name: OILS[oilId].name,
+      arabicName: OILS[oilId].arabicName,
+    }))
+
+    try {
+      const response = await fetch('/api/send-diagnostic', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email,
+          recommendedOils,
+          routineTitle: result.routineTitle,
+          routineSteps: result.routineSteps,
+          answers: selectedAnswers,
+        }),
+      })
+
+      if (response.ok) {
+        setEmailStatus('success')
+        setEmail('')
+      } else {
+        setEmailStatus('error')
+      }
+    } catch {
+      setEmailStatus('error')
+    }
   }
 
   if (isComplete) {
@@ -115,6 +164,60 @@ export default function DiagnosticForm() {
               </div>
             </div>
 
+            <form
+              className="mt-7 rounded-[1.75rem] border border-earth/10 bg-white/75 p-5 shadow-lg shadow-earth/5 md:p-6"
+              onSubmit={sendDiagnosticEmail}
+            >
+              <div className="grid gap-4 md:grid-cols-[1fr_1.1fr] md:items-end">
+                <div>
+                  <p className="text-xs font-bold uppercase tracking-[0.22em] text-olive">
+                    Optionnel / اختياري
+                  </p>
+                  <h2 className="mt-2 font-display text-2xl font-extrabold text-earth">
+                    Recevoir le diagnostic par mail
+                  </h2>
+                  <p className="mt-2 text-sm leading-6 text-earth/65">
+                    Laisse ton email si tu veux garder tes recommandations. خليه هنا إلا بغيتي توصلك النتيجة.
+                  </p>
+                </div>
+
+                <div className="flex flex-col gap-3 sm:flex-row">
+                  <input
+                    className="min-h-12 flex-1 rounded-full border border-earth/15 bg-cream px-5 text-base font-semibold text-earth outline-none transition placeholder:text-earth/35 focus:border-olive focus:ring-4 focus:ring-olive/10"
+                    name="email"
+                    onChange={(event) => {
+                      setEmail(event.target.value)
+                      if (emailStatus !== 'idle') {
+                        setEmailStatus('idle')
+                      }
+                    }}
+                    placeholder="email@example.com"
+                    required
+                    type="email"
+                    value={email}
+                  />
+                  <button
+                    className="min-h-12 rounded-full bg-earth px-6 py-3 font-bold text-cream shadow-lg shadow-earth/15 transition hover:-translate-y-0.5 hover:bg-olive disabled:cursor-not-allowed disabled:opacity-60"
+                    disabled={emailStatus === 'sending'}
+                    type="submit"
+                  >
+                    {emailStatus === 'sending' ? 'Envoi...' : 'Envoyer / إرسال'}
+                  </button>
+                </div>
+              </div>
+
+              {emailStatus === 'success' ? (
+                <p className="mt-3 text-sm font-semibold text-olive">
+                  Diagnostic envoyé. Merci / تم الإرسال، شكرا.
+                </p>
+              ) : null}
+              {emailStatus === 'error' ? (
+                <p className="mt-3 text-sm font-semibold text-red-700">
+                  Erreur d&apos;envoi. Réessaie dans un instant.
+                </p>
+              ) : null}
+            </form>
+
             <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:justify-center">
               <button
                 className="min-h-12 rounded-full bg-gradient-to-r from-earth to-olive px-8 py-3 text-base font-bold text-cream shadow-xl shadow-earth/20 transition duration-300 hover:-translate-y-0.5 hover:shadow-2xl"
@@ -165,9 +268,9 @@ export default function DiagnosticForm() {
             <p className="mb-3 text-xs font-bold uppercase tracking-[0.22em] text-gold">
               Diagnostic naturel / تشخيص طبيعي
             </p>
-              <h2 className="font-display text-3xl font-extrabold leading-tight text-earth sm:text-4xl">
-                {question.text}
-              </h2>
+            <h2 className="font-display text-3xl font-extrabold leading-tight text-earth sm:text-4xl">
+              {question.text}
+            </h2>
 
             <div className="mt-7 grid gap-3">
               {question.options.map((option) => {
@@ -274,12 +377,12 @@ function HeroPanel() {
         </div>
 
         <aside className="relative grid place-items-center pt-36 lg:pt-40" aria-label="Turath image carousel">
-          <div className="absolute left-1/2 top-[-5rem] z-30 hidden h-24 w-32 -translate-x-1/2 place-items-center sm:grid lg:h-28 lg:w-40">
+          <div className="absolute left-1/2 top-[-4rem] z-30 hidden h-24 w-32 -translate-x-1/2 place-items-center sm:grid lg:h-28 lg:w-40">
             <Image
               src={LOGO_SRC}
               alt="Turath logo"
-              width={180}
-              height={132}
+              width={160}
+              height={112}
               className="h-full w-full object-contain brightness-0 invert"
             />
           </div>
