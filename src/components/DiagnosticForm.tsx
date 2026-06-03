@@ -10,12 +10,12 @@ import { Answers, calculateRecommendations } from '@/data/recommendations'
 
 const BOTTLE_SRC = '/bottle%20tran.png'
 
-const productAccents: Record<OilId, string> = {
-  argan: 'from-brand-sage via-brand-mist to-brand-taupe',
-  nigelle: 'from-brand-dark via-brand-primary to-brand-leaf',
-  amande: 'from-white via-brand-mist to-brand-sage',
-  coco: 'from-brand-mist via-white to-brand-sage',
-  sesame: 'from-brand-leaf via-brand-primary to-brand-taupe',
+const productBackgrounds: Record<OilId, string> = {
+  argan: 'bg-[#8a5a35]',
+  nigelle: 'bg-[#14120f]',
+  amande: 'bg-[#dfcfb8]',
+  coco: 'bg-[#f1eee4]',
+  sesame: 'bg-[#b89155]',
 }
 
 type EmailStatus = 'idle' | 'sending' | 'success' | 'error'
@@ -390,7 +390,7 @@ function ProductCard({ oilId, rank }: { oilId: OilId; rank: number }) {
 
   return (
     <article className="overflow-hidden rounded-lg border border-brand-dark/10 bg-white shadow-sm transition duration-300 ease-out hover:-translate-y-1 hover:shadow-lg">
-      <div className={`relative h-40 bg-gradient-to-br ${productAccents[oilId]} p-4`}>
+      <div className={`relative h-40 ${productBackgrounds[oilId]} p-4`}>
         <span className="absolute right-4 top-4 rounded-full border border-white/60 bg-white/78 px-3 py-1 text-xs font-bold text-brand-dark backdrop-blur">
           Reco {rank}
         </span>
