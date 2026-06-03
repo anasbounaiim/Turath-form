@@ -24,10 +24,12 @@ export interface Oil {
   texture: 'legere' | 'riche'
 }
 
-export const QUESTIONS: Question[] = [
+const ACTIVE_QUESTION_IDS = new Set(['usage', 'skinNeed', 'hairNeed', 'texture', 'recommendationStyle'])
+
+const ALL_QUESTIONS: Question[] = [
   {
     id: 'usage',
-    text: "Tu veux utiliser l'huile pour quoi ? / فين بغيتي تستعملي الزيت؟",
+    text: "Tu veux utiliser l'huile pour quoi ? / فين بغيتي تستعمل/تستعملي الزيت؟",
     options: [
       { id: 'skin', label: 'Peau / البشرة', scores: { argan: 5, nigelle: 5, amande: 5, sesame: 5 } },
       { id: 'hair', label: 'Cheveux / الشعر', scores: { argan: 5, amande: 5, coco: 5, sesame: 3, nigelle: 2 } },
@@ -93,7 +95,7 @@ export const QUESTIONS: Question[] = [
   },
   {
     id: 'avoidOil',
-    text: 'Tu as une huile que tu veux éviter ? / كاينة شي زيت بغيتي تتجنبيها؟',
+    text: 'Tu as une huile que tu veux éviter ? / كاينة شي زيت بغيتي تتجنب/تتجنبي؟',
     options: [
       { id: 'avoid_coco', label: 'Coco / الكوكو', avoidsOil: 'coco' },
       { id: 'avoid_argan', label: 'Argan / أركان', avoidsOil: 'argan' },
@@ -134,6 +136,8 @@ export const QUESTIONS: Question[] = [
     ],
   },
 ]
+
+export const QUESTIONS: Question[] = ALL_QUESTIONS.filter((question) => ACTIVE_QUESTION_IDS.has(question.id))
 
 export const OILS: Record<OilId, Oil> = {
   argan: {

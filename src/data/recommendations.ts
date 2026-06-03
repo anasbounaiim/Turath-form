@@ -60,7 +60,7 @@ function buildRoutine(oils: OilId[], preference?: string) {
       routineTitle: 'Routine simple / روتين بسيط',
       routineSteps: [
         `Commence avec ${OILS[oils[0]].name} - ${OILS[oils[0]].arabicName}, 3 à 4 fois par semaine.`,
-        'Applique une petite quantité / ديري كمية قليلة، وراقبي النتيجة بهدوء.',
+        'Applique une petite quantité / دير/ديري كمية قليلة، وراقب/راقبي النتيجة بهدوء.',
       ],
     }
   }
@@ -69,8 +69,8 @@ function buildRoutine(oils: OilId[], preference?: string) {
     return {
       routineTitle: 'Duo complémentaire / جوج زيوت مكملين',
       routineSteps: [
-        `Utilise ${OILS[oils[0]].name} comme base / استعملي ${OILS[oils[0]].arabicName} كأساس.`,
-        `Ajoute ${OILS[oils[1]].name} selon le besoin / زيدي ${OILS[oils[1]].arabicName} ملي تحتاجي عناية أكثر.`,
+        `Utilise ${OILS[oils[0]].name} comme base / استعمل/استعملي ${OILS[oils[0]].arabicName} كأساس.`,
+        `Ajoute ${OILS[oils[1]].name} selon le besoin / زيد/زيدي ${OILS[oils[1]].arabicName} ملي تحتاج/تحتاجي عناية أكثر.`,
       ],
     }
   }

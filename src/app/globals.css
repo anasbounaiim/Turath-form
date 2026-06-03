@@ -1,3 +1,104 @@
+@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+:root {
+  --color-primary: #3e5c50;
+  --color-primary-dark: #173f32;
+  --color-sage: #2f6a57;
+  --color-muted-green: #58756a;
+  --color-background: #eef7f0;
+  --color-background-soft: #dfeee4;
+  --color-mist: #f7fbf8;
+  --color-taupe: #d8c3a5;
+  --color-amber: #a38655;
+  --color-amber-dark: #6f5732;
+  --color-text: #173f32;
+  --font-cairo: 'Cairo', system-ui, sans-serif;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  background: var(--color-background);
+  color: var(--color-text);
+  font-family: var(--font-cairo);
+  text-rendering: optimizeLegibility;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+button,
+a {
+  -webkit-tap-highlight-color: transparent;
+}
+
+[dir='rtl'],
+.font-arabic {
+  font-family: var(--font-cairo);
+}
+
+.botanical-pattern {
+  background-color: var(--color-primary);
+  background-image:
+    radial-gradient(circle at 18% 18%, rgba(216, 195, 165, 0.2) 0 2px, transparent 3px),
+    radial-gradient(circle at 78% 26%, rgba(223, 238, 228, 0.2) 0 2px, transparent 3px),
+    linear-gradient(135deg, rgba(216, 195, 165, 0.12) 25%, transparent 25%),
+    linear-gradient(45deg, rgba(223, 238, 228, 0.1) 25%, transparent 25%);
+  background-size: 56px 56px, 72px 72px, 42px 42px, 46px 46px;
+}
+
+.path-pattern-green {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  background-color: var(--color-primary);
+}
+
+.path-pattern-green::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background-image: url('/carousel/path%20svg%201.png');
+  background-position: center;
+  background-size: cover;
+  mix-blend-mode: screen;
+  opacity: 0.44;
+}
+
+.interactive-lift {
+  transition:
+    transform 220ms ease,
+    box-shadow 220ms ease,
+    background-color 220ms ease,
+    color 220ms ease;
+}
+
+.interactive-lift:hover {
+  transform: translateY(-3px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
+}
